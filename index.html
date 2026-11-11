@@ -62,12 +62,8 @@ body.paused .ph{animation-play-state:paused}
 #bar{position:fixed;top:0;left:0;right:0;height:3px;z-index:30;background:rgba(255,255,255,.07)}
 #bar i{display:block;height:100%;width:0;background:var(--gold)}
 #top{position:fixed;top:0;left:0;right:0;height:var(--top);z-index:20;
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  display:flex;align-items:center;justify-content:flex-end;
   padding:env(safe-area-inset-top,0px) clamp(14px,3vw,32px) 0}
-#era{font-size:clamp(.62rem,1.5vw,.78rem);letter-spacing:.24em;text-transform:uppercase;
-  color:rgba(240,192,96,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  transition:opacity .5s ease}
-#era.swap{opacity:0}
 #play{flex:none;width:44px;height:44px;border-radius:50%;cursor:pointer;
   border:1px solid rgba(240,192,96,.45);background:rgba(11,9,7,.45);
   display:flex;align-items:center;justify-content:center}
@@ -133,7 +129,6 @@ body.ended #again{display:block}
 
 <div id="bar"><i></i></div>
 <div id="top">
-  <div id="era"></div>
   <button id="play" aria-label="Reproducir o pausar">
     <svg viewBox="0 0 24 24"><path id="icon" d="M8 5v14l11-7z"/></svg>
   </button>
@@ -232,7 +227,7 @@ const LINES=[
 ];
 
 const $=id=>document.getElementById(id);
-const song=$('song'), stage=$('stage'), roll=$('roll'), lyrics=$('lyrics'), era=$('era');
+const song=$('song'), stage=$('stage'), roll=$('roll'), lyrics=$('lyrics');
 const PLAY="M8 5v14l11-7z", PAUSE="M6 19h4V5H6v14zm8-14v14h4V5h-4z";
 
 /* ── Build DOM ── */
@@ -264,8 +259,6 @@ function show(n){
   if(old){old.classList.remove('on');old.classList.add('leaving');setTimeout(()=>old.classList.remove('leaving'),1900);}
   slides[n].classList.remove('leaving');slides[n].classList.add('on');
   cur=n;
-  era.classList.add('swap');
-  setTimeout(()=>{era.textContent=PHOTOS[cur][1];era.classList.remove('swap');},500);
 }
 
 /* ── Lyrics follow song.currentTime only ── */
