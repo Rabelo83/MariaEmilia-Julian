@@ -10,10 +10,11 @@
 <!-- Social / GitHub thumbnail -->
 <meta property="og:title"       content="Todo lo Cosechado — 54 Aniversario · Julián &amp; María Emilia">
 <meta property="og:description" content="Una canción de amor para conmemorar 54 años juntos.">
-<meta property="og:image"       content="16-54-aniversario.jpeg">
+<meta property="og:image"       content="https://rabelo83.github.io/MariaEmilia-Julian/16-54-aniversario.jpeg">
 <meta property="og:type"        content="website">
+<meta property="og:url"         content="https://rabelo83.github.io/MariaEmilia-Julian/">
 <meta name="twitter:card"       content="summary_large_image">
-<meta name="twitter:image"      content="16-54-aniversario.jpeg">
+<meta name="twitter:image"      content="https://rabelo83.github.io/MariaEmilia-Julian/16-54-aniversario.jpeg">
 
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lato:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
@@ -100,6 +101,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 #karaoke{
   position:fixed;bottom:0;left:0;right:0;z-index:40;
+  transition:opacity 1s ease;
   display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
   padding:0 clamp(12px,9vw,160px) calc(env(safe-area-inset-bottom,0px)+28px);
   gap:clamp(2px,0.6vh,6px);
@@ -462,7 +464,7 @@ photos.forEach(p=>{
 /* ──────────────────────────────────────────────────────
    STATE
 ──────────────────────────────────────────────────────*/
-let curSlide=0, curLine=-1, rafId=null;
+let curSlide=0, curLine=-1, rafId=null, slideTimer=null;
 const SLIDE_MS=7200;
 
 const slides=document.querySelectorAll('.slide');
@@ -488,6 +490,8 @@ function fireKenBurns(i){
 /* ──────────────────────────────────────────────────────
    SLIDE
 ──────────────────────────────────────────────────────*/
+function isDesignCard(i){ return photos[i].kb==='kbCard'; }
+
 function showSlide(n){
   slides[curSlide].classList.remove('active');dots[curSlide].classList.remove('active');
   curSlide=((n%photos.length)+photos.length)%photos.length;
@@ -497,6 +501,18 @@ function showSlide(n){
   setTimeout(()=>{eraBadge.textContent=photos[curSlide].era;
     eraBadge.classList.remove('fade-out');eraBadge.classList.add('fade-in');},480);
   counter.textContent=`${curSlide+1} / ${photos.length}`;
+  /* hide lyrics on the designed opening/closing cards */
+  karaokeEl.style.opacity=isDesignCard(curSlide)?'0':'1';
+  karaokeEl.style.pointerEvents=isDesignCard(curSlide)?'none':'auto';
+}
+
+/* ── Slide timer — pauses and resumes with audio ──── */
+function startSlideTimer(){
+  if(slideTimer)return;
+  slideTimer=setInterval(()=>showSlide(curSlide+1),SLIDE_MS);
+}
+function stopSlideTimer(){
+  if(slideTimer){clearInterval(slideTimer);slideTimer=null;}
 }
 
 /* ──────────────────────────────────────────────────────
@@ -557,16 +573,23 @@ function startPresentation(){
   fireKenBurns(0);
   eraBadge.textContent=photos[0].era;counter.textContent=`1 / ${photos.length}`;
   renderKaraoke(-1);
+  /* opening card — hide lyrics until a photo slide appears */
+  karaokeEl.style.opacity='0';karaokeEl.style.pointerEvents='none';
   song.play().catch(()=>{});playPath.setAttribute('d',PAUSE);
-  setInterval(()=>showSlide(curSlide+1),SLIDE_MS);
+  startSlideTimer();
   rafId=requestAnimationFrame(karaokeLoop);
 }
 
 function toggleAudio(e){
   e.stopPropagation();
-  if(song.paused){song.play();playPath.setAttribute('d',PAUSE);
-    if(!rafId)rafId=requestAnimationFrame(karaokeLoop);}
-  else{song.pause();playPath.setAttribute('d',PLAY);}
+  if(song.paused){
+    song.play();playPath.setAttribute('d',PAUSE);
+    startSlideTimer();
+    if(!rafId)rafId=requestAnimationFrame(karaokeLoop);
+  }else{
+    song.pause();playPath.setAttribute('d',PLAY);
+    stopSlideTimer();
+  }
 }
 
 song.addEventListener('timeupdate',()=>{
@@ -574,6 +597,7 @@ song.addEventListener('timeupdate',()=>{
 });
 song.addEventListener('ended',()=>{
   playPath.setAttribute('d',PLAY);
+  stopSlideTimer();
   if(rafId)cancelAnimationFrame(rafId);rafId=null;
   /* Show finale card */
   setTimeout(()=>{
