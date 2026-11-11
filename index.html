@@ -69,6 +69,9 @@ body.paused .ph{animation-play-state:paused}
   display:flex;align-items:center;justify-content:center}
 #top button svg{width:18px;height:18px;fill:var(--gold)}
 #full[hidden]{display:none}
+#top #again{display:none;width:auto;padding:0 18px;border-radius:22px;
+  font:400 .72rem 'Lato',sans-serif;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
+body.ended #top #again{display:flex}
 #top button:focus-visible,#go:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 
 /* ── Lyrics ───────────────────────────────────── */
@@ -134,6 +137,7 @@ body.outro #ded{opacity:1;transform:none}
 
 <div id="bar"><i></i></div>
 <div id="top">
+  <button id="again">↺&nbsp; Repetir</button>
   <button id="play" aria-label="Reproducir o pausar">
     <svg viewBox="0 0 24 24"><path id="icon" d="M8 5v14l11-7z"/></svg>
   </button>
@@ -308,7 +312,8 @@ function setPlaying(p){
   $('icon').setAttribute('d',p?PAUSE:PLAY);
 }
 function toggle(){ song.paused?song.play():song.pause(); }
-song.addEventListener('play', ()=>setPlaying(true));
+song.addEventListener('play', ()=>{document.body.classList.remove('ended');setPlaying(true);});
+song.addEventListener('ended',()=>document.body.classList.add('ended'));
 song.addEventListener('pause',()=>setPlaying(false));
 
 let started=false;
@@ -318,6 +323,7 @@ $('go').addEventListener('click',()=>{
   song.currentTime=0;song.play();
 });
 $('play').addEventListener('click',e=>{e.stopPropagation();toggle();});
+$('again').addEventListener('click',e=>{e.stopPropagation();song.currentTime=0;song.play();});
 
 /* Full screen (hidden where the browser does not support it, e.g. iPhone) */
 const root=document.documentElement;
