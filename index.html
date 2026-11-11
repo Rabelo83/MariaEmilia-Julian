@@ -28,7 +28,7 @@
   --cream:#f5e6c8;
   --ink:#0b0907;
   --top:56px;
-  --lh:clamp(2rem,6.4vh,3.6rem);
+  --lh:clamp(2rem,6.4vh,4.6rem);
   --band:calc(var(--lh)*3 + 26px + env(safe-area-inset-bottom,0px));
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -100,6 +100,9 @@ body.ended #top #again{display:flex}
   text-align:center;padding:0 16px;opacity:0;transform:translateY(8px);
   transition:opacity 1.8s ease,transform 1.8s ease}
 body.outro #ded{opacity:1;transform:none}
+#ded .more{font:italic 400 min(calc(var(--lh)*.56),4.8vw)/1.1 'Cormorant Garamond',Georgia,serif;
+  color:var(--gold);opacity:0;transition:opacity 1.8s ease;text-shadow:0 2px 8px rgba(0,0,0,.9)}
+body.outro2 #ded .more{opacity:1}
 #ded .to{font:italic 500 min(calc(var(--lh)*.62),5.6vw)/1.1 'Cormorant Garamond',Georgia,serif;
   color:var(--cream);text-shadow:0 2px 8px rgba(0,0,0,.9)}
 
@@ -112,9 +115,10 @@ body.outro #ded{opacity:1;transform:none}
 #start>*:not(.bg){position:relative;z-index:1}
 #poster{max-height:46vh;max-width:min(78vw,340px);border-radius:8px;
   box-shadow:0 0 0 1px rgba(255,255,255,.12),0 20px 60px rgba(0,0,0,.7)}
-#start .names{font-size:clamp(.66rem,1.6vw,.82rem);letter-spacing:.38em;text-transform:uppercase;color:rgba(240,192,96,.8)}
+#start .names{font-size:clamp(.66rem,1.6vw,1rem);letter-spacing:.38em;text-transform:uppercase;color:rgba(240,192,96,.8)}
 #start h1{font:400 clamp(2rem,7.5vw,4.2rem)/1.05 'Cormorant Garamond',Georgia,serif;color:var(--cream);text-wrap:balance}
-#start .sub{font:italic 400 clamp(1rem,3vw,1.5rem) 'Cormorant Garamond',Georgia,serif;color:var(--gold)}
+#start .sub{font:italic 400 clamp(1rem,3vw,1.9rem) 'Cormorant Garamond',Georgia,serif;color:var(--gold)}
+#start .more{font-size:clamp(.66rem,1.6vw,1.05rem);letter-spacing:.34em;text-transform:uppercase;color:var(--cream)}
 #go{min-height:50px;padding:0 40px;margin-top:6px;cursor:pointer;display:inline-flex;align-items:center;gap:12px;
   font:400 .8rem 'Lato',sans-serif;letter-spacing:.3em;text-transform:uppercase;
   color:var(--ink);background:var(--gold);border:0;border-radius:2px}
@@ -147,7 +151,7 @@ body.outro #ded{opacity:1;transform:none}
 </div>
 
 <div id="lyrics" class="idle" aria-live="off"><div id="roll"></div></div>
-<div id="ded"><div class="to">Para María Emilia, con todo mi amor</div></div>
+<div id="ded"><div class="to">Para María Emilia, con todo mi amor</div><div class="more">Y la historia continúa…</div></div>
 
 <div id="start">
   <img class="bg" src="16-54-aniversario.jpeg" alt="">
@@ -155,6 +159,7 @@ body.outro #ded{opacity:1;transform:none}
   <div class="names">Julián &amp; María Emilia</div>
   <h1>Todo lo cosechado</h1>
   <div class="sub">54 Aniversario · 1972 – 2026</div>
+  <div class="more">… y seguimos contando</div>
   <button id="go"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Comenzar</button>
 </div>
 
@@ -263,7 +268,7 @@ const CLOSE_START=LINES[LINES.length-2][0]-0.6;
 const STEP=(CLOSE_START-OPEN_END)/(PHOTOS.length-2);
 const scheduled=t=>t<OPEN_END?0:t>=CLOSE_START?PHOTOS.length-1:1+Math.floor((t-OPEN_END)/STEP);
 
-const DEDICATION_AT=LINES[LINES.length-1][1]+1.5;
+const DEDICATION_AT=LINES[LINES.length-1][1]+1.5, CONTINUES_AT=DEDICATION_AT+2.6;
 
 let cur=-1, sched=-1, lineIdx=-2;
 function show(n){
@@ -301,6 +306,7 @@ function tick(){
   const waiting=i<0?LINES[0][0]-t>3:(t>LINES[i][1]+2.5&&(!next||next[0]-t>3));
   lyrics.classList.toggle('idle',waiting);
   document.body.classList.toggle('outro',t>=DEDICATION_AT);
+  document.body.classList.toggle('outro2',t>=CONTINUES_AT);
 
   if(song.duration)$('bar').firstChild.style.width=(t/song.duration*100)+'%';
   requestAnimationFrame(tick);
