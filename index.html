@@ -62,13 +62,14 @@ body.paused .ph{animation-play-state:paused}
 #bar{position:fixed;top:0;left:0;right:0;height:3px;z-index:30;background:rgba(255,255,255,.07)}
 #bar i{display:block;height:100%;width:0;background:var(--gold)}
 #top{position:fixed;top:0;left:0;right:0;height:var(--top);z-index:20;
-  display:flex;align-items:center;justify-content:flex-end;
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;
   padding:env(safe-area-inset-top,0px) clamp(14px,3vw,32px) 0}
-#play{flex:none;width:44px;height:44px;border-radius:50%;cursor:pointer;
+#top button{flex:none;width:44px;height:44px;border-radius:50%;cursor:pointer;
   border:1px solid rgba(240,192,96,.45);background:rgba(11,9,7,.45);
   display:flex;align-items:center;justify-content:center}
-#play svg{width:18px;height:18px;fill:var(--gold)}
-#play:focus-visible,#go:focus-visible,#again:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+#top button svg{width:18px;height:18px;fill:var(--gold)}
+#full[hidden]{display:none}
+#top button:focus-visible,#go:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 
 /* ── Lyrics ───────────────────────────────────── */
 #lyrics{position:fixed;left:0;right:0;z-index:10;pointer-events:none;
@@ -89,11 +90,16 @@ body.paused .ph{animation-play-state:paused}
   filter:drop-shadow(0 2px 6px rgba(0,0,0,.9))}
 .ln.cur span{transform:scale(1)}
 
-#again{position:fixed;left:50%;transform:translateX(-50%);z-index:25;display:none;
-  bottom:calc(var(--band)/2 - 22px);min-height:44px;padding:0 28px;cursor:pointer;
-  font:300 .78rem 'Lato',sans-serif;letter-spacing:.28em;text-transform:uppercase;
-  color:var(--gold);background:rgba(11,9,7,.5);border:1px solid rgba(240,192,96,.5);border-radius:2px}
-body.ended #again{display:block}
+/* ── Closing dedication ───────────────────────── */
+#ded{position:fixed;left:0;right:0;z-index:10;pointer-events:none;
+  bottom:calc(14px + env(safe-area-inset-bottom,0px));height:calc(var(--lh)*3);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7em;
+  text-align:center;padding:0 16px;opacity:0;transform:translateY(8px);
+  transition:opacity 1.8s ease,transform 1.8s ease}
+body.outro #ded{opacity:1;transform:none}
+#ded .to{font:italic 500 min(calc(var(--lh)*.62),5.6vw)/1.1 'Cormorant Garamond',Georgia,serif;
+  color:var(--cream);text-shadow:0 2px 8px rgba(0,0,0,.9)}
+#ded .by{font-size:clamp(.62rem,1.5vw,.8rem);letter-spacing:.34em;text-transform:uppercase;color:var(--gold)}
 
 /* ── Start screen ─────────────────────────────── */
 #start{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -115,7 +121,7 @@ body.ended #again{display:block}
 @media (max-height:520px){
   :root{--top:46px}
   #poster{display:none}
-  #play{width:38px;height:38px}
+  #top button{width:38px;height:38px}
 }
 @media (prefers-reduced-motion:reduce){
   .slide.on .ph,.slide.leaving .ph{animation:none}
@@ -132,10 +138,13 @@ body.ended #again{display:block}
   <button id="play" aria-label="Reproducir o pausar">
     <svg viewBox="0 0 24 24"><path id="icon" d="M8 5v14l11-7z"/></svg>
   </button>
+  <button id="full" aria-label="Pantalla completa" hidden>
+    <svg viewBox="0 0 24 24"><path id="fsicon" d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm14 0h2v6h-6v-2h4v-4z"/></svg>
+  </button>
 </div>
 
 <div id="lyrics" class="idle" aria-live="off"><div id="roll"></div></div>
-<button id="again">↺ &nbsp;Repetir</button>
+<div id="ded"><div class="to">Para María Emilia, con todo mi amor</div><div class="by">Julián · 1972 – 2026</div></div>
 
 <div id="start">
   <img class="bg" src="16-54-aniversario.jpeg" alt="">
@@ -251,6 +260,8 @@ const CLOSE_START=LINES[LINES.length-2][0]-0.6;
 const STEP=(CLOSE_START-OPEN_END)/(PHOTOS.length-2);
 const scheduled=t=>t<OPEN_END?0:t>=CLOSE_START?PHOTOS.length-1:1+Math.floor((t-OPEN_END)/STEP);
 
+const DEDICATION_AT=LINES[LINES.length-1][1]+1.5;
+
 let cur=-1, sched=-1, lineIdx=-2;
 function show(n){
   n=(n+PHOTOS.length)%PHOTOS.length;
@@ -286,6 +297,7 @@ function tick(){
   const next=LINES[i+1];
   const waiting=i<0?LINES[0][0]-t>3:(t>LINES[i][1]+2.5&&(!next||next[0]-t>3));
   lyrics.classList.toggle('idle',waiting);
+  document.body.classList.toggle('outro',t>=DEDICATION_AT);
 
   if(song.duration)$('bar').firstChild.style.width=(t/song.duration*100)+'%';
   requestAnimationFrame(tick);
@@ -297,9 +309,8 @@ function setPlaying(p){
   $('icon').setAttribute('d',p?PAUSE:PLAY);
 }
 function toggle(){ song.paused?song.play():song.pause(); }
-song.addEventListener('play', ()=>{document.body.classList.remove('ended');setPlaying(true);});
+song.addEventListener('play', ()=>setPlaying(true));
 song.addEventListener('pause',()=>setPlaying(false));
-song.addEventListener('ended',()=>document.body.classList.add('ended'));
 
 let started=false;
 $('go').addEventListener('click',()=>{
@@ -308,7 +319,22 @@ $('go').addEventListener('click',()=>{
   song.currentTime=0;song.play();
 });
 $('play').addEventListener('click',e=>{e.stopPropagation();toggle();});
-$('again').addEventListener('click',e=>{e.stopPropagation();song.currentTime=0;song.play();});
+
+/* Full screen (hidden where the browser does not support it, e.g. iPhone) */
+const root=document.documentElement;
+const fsOn=()=>document.fullscreenElement||document.webkitFullscreenElement;
+const FS_IN="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm14 0h2v6h-6v-2h4v-4z";
+const FS_OUT="M8 4h2v6H4V8h4V4zm6 0h2v4h4v2h-6V4zM4 14h6v6H8v-4H4v-2zm10 0h6v2h-4v4h-2v-6z";
+function fullscreen(){
+  if(fsOn())(document.exitFullscreen||document.webkitExitFullscreen).call(document);
+  else (root.requestFullscreen||root.webkitRequestFullscreen).call(root);
+}
+if(root.requestFullscreen||root.webkitRequestFullscreen){
+  $('full').hidden=false;
+  $('full').addEventListener('click',e=>{e.stopPropagation();fullscreen();});
+  ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>
+    document.addEventListener(ev,()=>$('fsicon').setAttribute('d',fsOn()?FS_OUT:FS_IN)));
+}
 
 /* Manual photo browsing never touches the lyrics */
 stage.addEventListener('click',e=>{ if(started)show(cur+(e.clientX<innerWidth/3?-1:1)); });
@@ -324,6 +350,7 @@ document.addEventListener('keydown',e=>{
   if(e.key===' '){e.preventDefault();toggle();}
   else if(e.key==='ArrowRight')show(cur+1);
   else if(e.key==='ArrowLeft')show(cur-1);
+  else if((e.key==='f'||e.key==='F')&&!$('full').hidden)fullscreen();
 });
 
 setLine(-1);
