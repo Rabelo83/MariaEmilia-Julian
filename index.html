@@ -29,7 +29,8 @@
   --ink:#0b0907;
   --top:56px;
   --lh:clamp(2rem,6.4vh,4.6rem);
-  --band:calc(var(--lh)*3 + 26px + env(safe-area-inset-bottom,0px));
+  --en:calc(var(--lh)*.52);
+  --band:calc(var(--lh)*3 + var(--en) + 26px + env(safe-area-inset-bottom,0px));
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden;background:var(--ink);color:var(--cream);
@@ -77,32 +78,38 @@ body.ended #top #again{display:flex}
 /* ── Lyrics ───────────────────────────────────── */
 #lyrics{position:fixed;left:0;right:0;z-index:10;pointer-events:none;
   bottom:calc(14px + env(safe-area-inset-bottom,0px));
-  height:calc(var(--lh)*3);overflow:hidden;transition:opacity .9s ease}
+  height:calc(var(--lh)*3 + var(--en));overflow:hidden;transition:opacity .9s ease}
 #lyrics.idle{opacity:0}
 #roll{transition:transform .55s cubic-bezier(.3,.7,.2,1);will-change:transform}
-.ln{height:var(--lh);display:flex;align-items:center;justify-content:center;
+.ln{display:flex;flex-direction:column;align-items:center;
   opacity:0;transition:opacity .5s ease}
 .ln.near{opacity:.42}
 .ln.cur{opacity:1}
-.ln span{display:inline-block;white-space:nowrap;
+.ln span{display:inline-flex;align-items:center;height:var(--lh);white-space:nowrap;
   font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-weight:500;
-  font-size:min(calc(var(--lh)*.66),6.3vw);line-height:1;padding:.12em .1em;
+  font-size:min(calc(var(--lh)*.66),6.3vw);line-height:1;padding:0 .1em;
   transform:scale(.74);transition:transform .55s cubic-bezier(.3,.7,.2,1);
   background:linear-gradient(90deg,var(--gold) var(--fill,0%),var(--cream) var(--fill,0%));
   -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
   filter:drop-shadow(0 2px 6px rgba(0,0,0,.9))}
 .ln.cur span{transform:scale(1)}
+.en{font:400 min(max(11px,calc(var(--lh)*.3)),3.8vw)/1.2 'Lato',sans-serif;letter-spacing:.05em;
+  color:rgba(245,230,200,.72);text-shadow:0 1px 5px rgba(0,0,0,.9)}
+.ln .en{height:0;opacity:0;overflow:hidden;white-space:nowrap;
+  transition:height .55s cubic-bezier(.3,.7,.2,1),opacity .5s ease}
+.ln.cur .en{height:var(--en);opacity:1}
 
 /* ── Closing dedication ───────────────────────── */
 #ded{position:fixed;left:0;right:0;z-index:10;pointer-events:none;
-  bottom:calc(14px + env(safe-area-inset-bottom,0px));height:calc(var(--lh)*3);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7em;
+  bottom:calc(14px + env(safe-area-inset-bottom,0px));height:calc(var(--lh)*3 + var(--en));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25em;
   text-align:center;padding:0 16px;opacity:0;transform:translateY(8px);
   transition:opacity 1.8s ease,transform 1.8s ease}
 body.outro #ded{opacity:1;transform:none}
-#ded .more{font:italic 400 min(calc(var(--lh)*.56),4.8vw)/1.1 'Cormorant Garamond',Georgia,serif;
+#ded .more{margin-top:.5em;font:italic 400 min(calc(var(--lh)*.56),4.8vw)/1.1 'Cormorant Garamond',Georgia,serif;
   color:var(--gold);opacity:0;transition:opacity 1.8s ease;text-shadow:0 2px 8px rgba(0,0,0,.9)}
-body.outro2 #ded .more{opacity:1}
+#ded .more-en{opacity:0;transition:opacity 1.8s ease}
+body.outro2 #ded .more,body.outro2 #ded .more-en{opacity:1}
 #ded .to{font:italic 500 min(calc(var(--lh)*.62),5.6vw)/1.1 'Cormorant Garamond',Georgia,serif;
   color:var(--cream);text-shadow:0 2px 8px rgba(0,0,0,.9)}
 
@@ -119,6 +126,7 @@ body.outro2 #ded .more{opacity:1}
 #start h1{font:400 clamp(2rem,7.5vw,4.2rem)/1.05 'Cormorant Garamond',Georgia,serif;color:var(--cream);text-wrap:balance}
 #start .sub{font:italic 400 clamp(1rem,3vw,1.9rem) 'Cormorant Garamond',Georgia,serif;color:var(--gold)}
 #start .more{font-size:clamp(.66rem,1.6vw,1.05rem);letter-spacing:.34em;text-transform:uppercase;color:var(--cream)}
+#start .en{margin-top:calc(clamp(10px,2.2vh,22px)*-.7)}
 #go{min-height:50px;padding:0 40px;margin-top:6px;cursor:pointer;display:inline-flex;align-items:center;gap:12px;
   font:400 .8rem 'Lato',sans-serif;letter-spacing:.3em;text-transform:uppercase;
   color:var(--ink);background:var(--gold);border:0;border-radius:2px}
@@ -151,15 +159,17 @@ body.outro2 #ded .more{opacity:1}
 </div>
 
 <div id="lyrics" class="idle" aria-live="off"><div id="roll"></div></div>
-<div id="ded"><div class="to">Para María Emilia, con todo mi amor</div><div class="more">Y la historia continúa…</div></div>
+<div id="ded"><div class="to" lang="es">Para María Emilia, con todo mi amor</div><div class="en" lang="en">For María Emilia, with all my love</div><div class="more" lang="es">Y la historia continúa…</div><div class="en more-en" lang="en">And the story continues…</div></div>
 
 <div id="start">
   <img class="bg" src="16-54-aniversario.jpeg" alt="">
   <img id="poster" src="16-54-aniversario.jpeg" alt="Julián y María Emilia, 54 Aniversario">
   <div class="names">Julián &amp; María Emilia</div>
   <h1>Todo lo cosechado</h1>
+  <div class="en" lang="en">All That We Have Harvested</div>
   <div class="sub">54 Aniversario · 1972 – 2026</div>
   <div class="more">… y seguimos contando</div>
+  <div class="en" lang="en">… and still counting</div>
   <button id="go"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Comenzar</button>
 </div>
 
@@ -185,62 +195,62 @@ const PHOTOS=[
   ["16-54-aniversario.jpeg",      "54 Aniversario"],
 ];
 
-/* [inicio, fin, texto] en segundos de la canción */
+/* [inicio, fin, español, english] — tiempos en segundos de la canción */
 const LINES=[
-  [14.62,17.60,"María Emilia y yo, somos"],
-  [17.60,21.96,"De un poema, dos versos,"],
-  [21.96,25.12,"Somos portadas, reversos"],
-  [25.44,29.02,"De libros en varios tomos."],
-  [29.96,32.68,"Somos tapa, somos pomos"],
-  [33.20,36.02,"de todo lo elaborado,"],
-  [36.62,39.72,"Como un cofre resguardado"],
-  [39.86,41.56,"Con amor bien protegido,"],
-  [41.72,43.38,"Con amor se ha recogido,"],
-  [43.38,45.08,"Todo lo cosechado."],
+  [14.62,17.60,"María Emilia y yo, somos","Mar\u00eda Emilia and I, we are"],
+  [17.60,21.96,"De un poema, dos versos,","Two verses of one poem,"],
+  [21.96,25.12,"Somos portadas, reversos","We are the covers, front and back,"],
+  [25.44,29.02,"De libros en varios tomos.","Of books in many volumes."],
+  [29.96,32.68,"Somos tapa, somos pomos","We are the lid, we are the jars"],
+  [33.20,36.02,"de todo lo elaborado,","Of everything we have made,"],
+  [36.62,39.72,"Como un cofre resguardado","Like a well-guarded chest"],
+  [39.86,41.56,"Con amor bien protegido,","With love kept safe inside,"],
+  [41.72,43.38,"Con amor se ha recogido,","With love we have gathered"],
+  [43.38,45.08,"Todo lo cosechado.","All that we have harvested."],
 
-  [51.96,54.06,"Somos polos diferentes"],
-  [55.16,58.14,"Por ello, hay atracción"],
-  [59.32,61.68,"Somos acción, reacción"],
-  [62.30,66.18,"Somos dos conectadas mentes."],
-  [66.96,69.60,"Somos dos almas pacientes"],
-  [70.38,73.12,"Orgullosas de un pasado"],
-  [74.37,76.74,"Que con el amor pactado"],
-  [76.74,78.58,"En aquel día elegido"],
-  [78.58,80.44,"Con amor se ha recogido"],
-  [80.44,82.24,"Todo lo cosechado."],
+  [51.96,54.06,"Somos polos diferentes","We are opposite poles,"],
+  [55.16,58.14,"Por ello, hay atracción","That is why there is attraction,"],
+  [59.32,61.68,"Somos acción, reacción","We are action, reaction,"],
+  [62.30,66.18,"Somos dos conectadas mentes.","We are two connected minds."],
+  [66.96,69.60,"Somos dos almas pacientes","We are two patient souls,"],
+  [70.38,73.12,"Orgullosas de un pasado","Proud of a past"],
+  [74.37,76.74,"Que con el amor pactado","That, with the love we pledged"],
+  [76.74,78.58,"En aquel día elegido","On that chosen day,"],
+  [78.58,80.44,"Con amor se ha recogido","With love we have gathered"],
+  [80.44,82.24,"Todo lo cosechado.","All that we have harvested."],
 
-  [89.52,91.56,"Somos las alas en par"],
-  [93.08,95.16,"Sosteniendo un corazón"],
-  [96.86,98.86,"Componemos la razón,"],
-  [99.32,102.44,"De una generación crear."],
-  [103.62,106.60,"Tronco y rama, nuevo hogar"],
-  [107.58,109.88,"Que nació en el pasado"],
-  [111.00,113.70,"Riberas y un río dado"],
-  [113.70,115.62,"En un largo recorrido"],
-  [115.62,117.46,"Con amor se ha recogido"],
-  [117.46,119.40,"Todo lo cosechado."],
+  [89.52,91.56,"Somos las alas en par","We are a pair of wings"],
+  [93.08,95.16,"Sosteniendo un corazón","Holding up one heart,"],
+  [96.86,98.86,"Componemos la razón,","Together we are the reason"],
+  [99.32,102.44,"De una generación crear.","A new generation came to be."],
+  [103.62,106.60,"Tronco y rama, nuevo hogar","Trunk and branch, a new home"],
+  [107.58,109.88,"Que nació en el pasado","That was born in the past,"],
+  [111.00,113.70,"Riberas y un río dado","Riverbanks and a river given"],
+  [113.70,115.62,"En un largo recorrido","Along a long journey,"],
+  [115.62,117.46,"Con amor se ha recogido","With love we have gathered"],
+  [117.46,119.40,"Todo lo cosechado.","All that we have harvested."],
 
-  [134.26,137.26,"Agua dulce, agua salada"],
-  [137.28,140.50,"En el umbral de la unión"],
-  [141.24,144.18,"Salvando la situación,"],
-  [144.18,148.30,"A veces, tan complicada."],
-  [148.64,150.82,"Experiencia acumulada"],
-  [150.82,154.58,"En eventos del pasado,"],
-  [155.18,158.04,"Hoy, aquí hemos llegado"],
-  [158.20,160.06,"Recordando lo vivido"],
-  [160.06,161.82,"Con amor se ha recogido"],
-  [161.82,163.66,"Todo lo cosechado."],
+  [134.26,137.26,"Agua dulce, agua salada","Fresh water, salt water"],
+  [137.28,140.50,"En el umbral de la unión","At the threshold of our union,"],
+  [141.24,144.18,"Salvando la situación,","Finding a way through things"],
+  [144.18,148.30,"A veces, tan complicada.","That were, at times, so hard."],
+  [148.64,150.82,"Experiencia acumulada","Experience gathered"],
+  [150.82,154.58,"En eventos del pasado,","From all that came before,"],
+  [155.18,158.04,"Hoy, aquí hemos llegado","Today, here we have arrived"],
+  [158.20,160.06,"Recordando lo vivido","Remembering what we lived,"],
+  [160.06,161.82,"Con amor se ha recogido","With love we have gathered"],
+  [161.82,163.66,"Todo lo cosechado.","All that we have harvested."],
 
-  [164.18,167.34,"Gracias a Dios, por la vida"],
-  [167.34,171.44,"Que juntos hemos vivido"],
-  [171.44,174.88,"Gracias a Dios, por Cupido"],
-  [174.88,178.30,"Del flechazo y la herida."],
-  [179.44,182.28,"Gracias por la bendecida"],
-  [182.50,185.92,"Familia que hemos creado"],
-  [186.44,189.74,"Gracias por haber llegado"],
-  [189.74,192.66,"A otro año más, cumplido"],
-  [193.04,195.02,"Con amor se ha recogido"],
-  [195.02,198.30,"Todo lo cosechado."],
+  [164.18,167.34,"Gracias a Dios, por la vida","Thank God for the life"],
+  [167.34,171.44,"Que juntos hemos vivido","We have lived together,"],
+  [171.44,174.88,"Gracias a Dios, por Cupido","Thank God for Cupid,"],
+  [174.88,178.30,"Del flechazo y la herida.","For the arrow and the wound."],
+  [179.44,182.28,"Gracias por la bendecida","Thank you for the blessed"],
+  [182.50,185.92,"Familia que hemos creado","Family we have created,"],
+  [186.44,189.74,"Gracias por haber llegado","Thank you for having reached"],
+  [189.74,192.66,"A otro año más, cumplido","One more year, fulfilled,"],
+  [193.04,195.02,"Con amor se ha recogido","With love we have gathered"],
+  [195.02,198.30,"Todo lo cosechado.","All that we have harvested."],
 ];
 
 const $=id=>document.getElementById(id);
@@ -255,9 +265,11 @@ PHOTOS.forEach(([f],i)=>{
   stage.appendChild(s);
 });
 const slides=[...stage.children];
-LINES.forEach(([, ,t])=>{
+LINES.forEach(([, ,es,en])=>{
   const d=document.createElement('div');d.className='ln';
-  const sp=document.createElement('span');sp.textContent=t;d.appendChild(sp);roll.appendChild(d);
+  const sp=document.createElement('span');sp.textContent=es;sp.lang='es';
+  const tr=document.createElement('div');tr.className='en';tr.textContent=en;tr.lang='en';
+  d.append(sp,tr);roll.appendChild(d);
 });
 const lns=[...roll.children];
 
